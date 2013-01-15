@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.nuxeo.common.utils.URIUtils;
 import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.opensocial.container.shared.webcontent.OpenSocialData;
@@ -38,25 +39,13 @@ public class UrlBuilder {
 
     private static final String SERVLET_PATH = "opensocial/gadgets/ifr";
 
-    private static final String CONTAINER_KEY = "container";
-
     private static final String CONTAINER_VALUE = "default";
-
-    private static final String GADGET_ID_KEY = "mid";
-
-    private static final String NOCACHE_KEY = "nocache";
 
     private static final String NOCACHE_VALUE = "1";
 
-    private static final String COUNTRY_KEY = "country";
-
     private static final String COUNTRY_VALUE = "ALL";
 
-    private static final String LANG_KEY = "lang";
-
     private static final String DEFAULT_LANG_VALUE = "ALL";
-
-    private static final String VIEW_KEY = "view";
 
     private static final String VIEW_VALUE = "default";
 
@@ -64,15 +53,7 @@ public class UrlBuilder {
 
     private static final String PERMISSION_VALUE = "[]";
 
-    private static final String PARENT_KEY = "parent";
-
-    private static final String URL_KEY = "url";
-
     private static final String PREF_PREFIX = "up_";
-
-    private static final String SECURITY_TOKEN_KEY = "st";
-
-    private static final String RPC_TOKEN = "rpctoken";
 
     private static final Log log = LogFactory.getLog(UrlBuilder.class);
 
@@ -89,23 +70,19 @@ public class UrlBuilder {
 
         // container=default&nocache=1&country=fr&lang=ALL&view=default
         params.putAll(getDefaultParams());
-        // mid=123456
-        params.put(GADGET_ID_KEY, Integer.toString(containerId++));
-        // parent=http://localhost:8080/...
-        params.put(PARENT_KEY, serverBase);
-        // url=http://.../gadget.xml?up_prefname=prefvalue
-        params.put(URL_KEY, gadgetDef);
+
+        params.put(Param.GADGET.getKey(), data.getGadgetName());
+        params.put(Param.URL.getKey(), gadgetDef);
+        
         params.putAll(getUserPrefsParams(userPrefs));
         // turn on debugging for the JS (avoid compression)
-        params.put("debug", (SHINDIG_DEBUG) ? "1" : "0");
+        params.put(Param.DEBUG.getKey(), (SHINDIG_DEBUG) ? "1" : "0");
         // st=qdlfjqsmfkjqf
         try {
-            params.put(SECURITY_TOKEN_KEY, getSecurityToken(data, gadgetDef));
+            params.put(Param.SECURITY_TOKEN.getKey(), getSecurityToken(data, gadgetDef));
         } catch (Exception e) {
             log.warn("Unable to get security token");
         }
-        // rpctoken=123415
-        params.put(RPC_TOKEN, "open-social-" + data.getId());
 
         // http://localhost:8080/nuxeo/opensocial/gadgets/ifr
         String url = URIUtils.getURIPath(serverBase + SERVLET_PATH);
@@ -157,11 +134,11 @@ public class UrlBuilder {
 
     private static Map<String, String> getDefaultParams() {
         Map<String, String> defaultParams = new LinkedHashMap<String, String>();
-        defaultParams.put(CONTAINER_KEY, CONTAINER_VALUE);
-        defaultParams.put(NOCACHE_KEY, NOCACHE_VALUE);
-        defaultParams.put(COUNTRY_KEY, COUNTRY_VALUE);
-        defaultParams.put(LANG_KEY, DEFAULT_LANG_VALUE);
-        defaultParams.put(VIEW_KEY, VIEW_VALUE);
+        defaultParams.put(Param.CONTAINER.getKey(), CONTAINER_VALUE);
+        defaultParams.put(Param.NO_CACHE.getKey(), NOCACHE_VALUE);
+        defaultParams.put(Param.COUNTRY.getKey(), COUNTRY_VALUE);
+        defaultParams.put(Param.LANG.getKey(), DEFAULT_LANG_VALUE);
+        defaultParams.put(Param.VIEW.getKey(), VIEW_VALUE);
         defaultParams.put(PERMISSION_KEY, PERMISSION_VALUE);
         return defaultParams;
     }

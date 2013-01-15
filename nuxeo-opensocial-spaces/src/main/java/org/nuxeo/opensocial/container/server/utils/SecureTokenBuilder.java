@@ -17,12 +17,20 @@
 
 package org.nuxeo.opensocial.container.server.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shindig.auth.AbstractSecurityToken;
 import org.apache.shindig.auth.BlobCrypterSecurityToken;
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
+import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.nuxeo.opensocial.service.api.OpenSocialService;
+import org.nuxeo.opensocial.service.impl.OpenSocialServiceImpl;
 import org.nuxeo.runtime.api.Framework;
 
 /**
@@ -35,6 +43,10 @@ public class SecureTokenBuilder {
     public static String getSecureToken(String viewer, String owner,
             String gadgetUrl, boolean encode) throws Exception {
         OpenSocialService svc = Framework.getService(OpenSocialService.class);
+        
+        // TODO - Come up with another way to get the SecurityTokenCodec
+        SecurityTokenCodec codec = ((OpenSocialServiceImpl)svc).getInjector().getInstance(SecurityTokenCodec.class);
+
         String container = "default";
         String domain = "localhost";
         if (svc.getPortalConfig() == null) {
@@ -42,32 +54,14 @@ public class SecureTokenBuilder {
                     + svc.getPortalConfig().length
                     + " choices but we don't know how to pick the correct configuration!");
         }
-        return getSecureToken(viewer, owner, gadgetUrl,
-                svc.getSigningStateKeyBytes(), container, domain, encode);
+          
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(AbstractSecurityToken.Keys.VIEWER.getKey(), viewer);
+        params.put(AbstractSecurityToken.Keys.OWNER.getKey(), owner);
+        params.put(AbstractSecurityToken.Keys.APP_URL.getKey(), gadgetUrl);
+        
+        SecurityToken st = new BlobCrypterSecurityToken(container, domain, gadgetUrl, params);
+        return codec.encodeToken(st);
     }
 
-    /**
-     * XXX LeroyMerlin's old version.
-     *
-     * @param viewer
-     * @param owner
-     * @param gadgetUrl
-     * @return
-     * @throws Exception
-     */
-
-    public static String getSecureToken(String viewer, String owner,
-            String gadgetUrl, byte[] key, String container, String domain,
-            boolean encode) throws Exception {
-        BlobCrypterSecurityToken st = new BlobCrypterSecurityToken(
-                new BasicBlobCrypter(key), container, domain);
-        st.setViewerId(viewer);
-        st.setOwnerId(owner);
-        st.setAppUrl(gadgetUrl);
-        String token = st.encrypt();
-        if (encode) {
-            token = Utf8UrlCoder.encode(token);
-        }
-        return token;
-    }
 }

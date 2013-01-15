@@ -151,7 +151,7 @@ public class OpenSocialAdapter extends
 
             List<org.nuxeo.opensocial.container.shared.webcontent.UserPref> dataUserPrefs = new ArrayList<org.nuxeo.opensocial.container.shared.webcontent.UserPref>();
 
-            for (UserPref openSocialUserPref : gadgetSpec.getUserPrefs()) {
+            for (UserPref openSocialUserPref : gadgetSpec.getUserPrefs().values()) {
                 org.nuxeo.opensocial.container.shared.webcontent.UserPref dataPref = new org.nuxeo.opensocial.container.shared.webcontent.UserPref(
                         openSocialUserPref.getName(),
                         DataType.valueOf(openSocialUserPref.getDataType().toString()));
