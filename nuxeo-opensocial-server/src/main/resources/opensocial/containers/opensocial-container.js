@@ -54,33 +54,94 @@
 // value matching this set will return a 404 error.
 "gadgets.parent" : null,
 
-// Should all gadgets be forced on to a locked domain?
-"gadgets.lockedDomainRequired" : false,
-
-// DNS domain on which gadgets should render.
-"gadgets.lockedDomainSuffix" : "-a.example.com:8080",
+// Origins for CORS requests and/or Referer validation
+// Indicate a set of origins or an entry with * to indicate that all origins are allowed
+"gadgets.parentOrigins" : ["*"],
 
 // Various urls generated throughout the code base.
 // iframeBaseUri will automatically have the host inserted
 // if locked domain is enabled and the implementation supports it.
 // query parameters will be added.
-"gadgets.iframeBaseUri" :  "/nuxeo/opensocial/gadgets/ifr",
-
-// jsUriTemplate will have %host% and %js% substituted.
-// No locked domain special cases, but jsUriTemplate must
-// never conflict with a lockedDomainSuffix.
-"gadgets.jsUriTemplate" : "http://%host%/nuxeo/opensocial/gadgets/js/%js%",
+"gadgets.iframeBaseUri" : "${org.nuxeo.ecm.contextPath}/opensocial/gadgets/ifr",
+"gadgets.uri.iframe.basePath" : "${org.nuxeo.ecm.contextPath}/opensocial/gadgets/ifr",
 
 // Callback URL.  Scheme relative URL for easy switch between https/http.
-"gadgets.oauthGadgetCallbackTemplate" : "//%host%/nuxeo/opensocial/gadgets/oauthcallback",
-
-// Use an insecure security token by default
-"gadgets.securityTokenType" : "secure",
+"gadgets.uri.oauth.callbackTemplate" : "//%host%${org.nuxeo.ecm.contextPath}/opensocial/gadgets/oauthcallback",
 
 // Config param to load Opensocial data for social
 // preloads in data pipelining.  %host% will be
 // substituted with the current host.
-"gadgets.osDataUri" : "http://%host%/nuxeo/opensocial/social/rpc",
+"gadgets.osDataUri" : "http://%host%${org.nuxeo.ecm.contextPath}/opensocial/social/rpc",
+
+// Use an insecure security token by default
+"gadgets.securityTokenType" : "secure",
+"gadgets.securityTokenTTL" : 300,
+
+// Uncomment the securityTokenType and one of the securityTokenKey's to switch to a secure version.
+// Note that you can choose to use an embedded key, a filesystem reference or a classpath reference.
+// The best way to generate a key is to do something like this:
+// dd if=/dev/random bs=32 count=1 | openssl base64
+//
+//"gadgets.securityTokenType" : "secure",
+//"gadgets.securityTokenKey" : "default-insecure-embedded-key",
+//"gadgets.securityTokenKey" : "file:///path/to/key/file.txt",
+//"gadgets.securityTokenKey" : "res://some-file-on-the-classpath.txt",
+
+// OS 2.0 Gadget DOCTYPE: used in Gadgets with @specificationVersion 2.0 or greater and
+// quirksmode on Gadget has not been set.
+"gadgets.doctype_qname" : "HTML",  //HTML5 doctype
+"gadgets.doctype_pubid" : "",
+"gadgets.doctype_sysid" : "",
+
+// In a locked domain config, these can remain as-is in order to have requests encountered use the
+// host they came in on (locked host).
+"default.domain.locked.client" : "%host%",
+"default.domain.locked.server" : "%authority%",
+
+// IMPORTANT: EDITME: In a locked domain configuration, these should be changed to explicit values of
+// your unlocked host. You should not use %host% or %authority% replacements or these defaults in a
+// locked domain deployment.
+// Both of these values will likely be identical in a real locked domain deployment.
+"default.domain.unlocked.client" : "${Cur['default.domain.locked.client']}",
+"default.domain.unlocked.server" : "${Cur['default.domain.locked.server']}",
+
+// You can change this if you wish unlocked gadgets to render on a different domain from the default.
+"gadgets.uri.iframe.unlockedDomain" : "${Cur['default.domain.unlocked.server']}", // DNS domain on which *unlocked* gadgets should render.
+
+// IMPORTANT: EDITME: In a locked domain configuration, this suffix should be provided explicitly.
+// It is recommended that it be a separate top-level-domain (TLD) than the unlocked TLD.
+// You should not use replacement here (avoid %authority%)
+// Example: unlockedDomain="shindig.example.com" lockedDomainSuffix="-locked.example-gadgets.com"
+"gadgets.uri.iframe.lockedDomainSuffix" : "${Cur['default.domain.locked.server']}", // DNS domain on which *locked* gadgets should render.
+
+// Should all gadgets be forced on to a locked domain?
+"gadgets.uri.iframe.lockedDomainRequired" : false,
+
+// Default Js Uri config: also must be overridden.
+// gadgets.uri.js.host should be protocol relative.
+"gadgets.uri.js.host" : "//${Cur['default.domain.unlocked.server']}", // Use unlocked host for better caching.
+
+// If you change the js.path you will need to define window.__CONTAINER_SCRIPT_ID prior to loading the <script>
+// tag for container JavaScript into the DOM.
+"gadgets.uri.js.path" : "http://%host%${org.nuxeo.ecm.contextPath}/opensocial/gadgets/js/",
+
+// Default concat Uri config; used for testing.
+"gadgets.uri.concat.host" : "${Cur['default.domain.unlocked.server']}", // Use unlocked host for better caching.
+"gadgets.uri.concat.path" : "${org.nuxeo.ecm.contextPath}/opensocial/gadgets/concat",
+"gadgets.uri.concat.js.splitToken" : "false",
+
+// Default proxy Uri config; used for testing.
+"gadgets.uri.proxy.host" : "${Cur['default.domain.unlocked.server']}", // Use unlocked host for better caching.
+"gadgets.uri.proxy.path" : "${org.nuxeo.ecm.contextPath}/opensocial/gadgets/proxy",
+
+// Enables/Disables feature administration
+"gadgets.admin.enableFeatureAdministration" : "false",
+
+// Enables whitelist checks
+"gadgets.admin.enableGadgetWhitelist" : "false",
+
+// Max post size for posts through the makeRequest proxy.
+"gadgets.jsonProxyUrl.maxPostSize" : 5242880, // 5 MiB
 
 // Uncomment these to switch to a secure version
 //
@@ -96,8 +157,15 @@
 "gadgets.features" : {
   "core.io" : {
     // Note: /proxy is an open proxy. Be careful how you expose this!
-    "proxyUrl" : "http://%host%/nuxeo/opensocial/gadgets/proxy?refresh=%refresh%&url=%url%",
-    "jsonProxyUrl" : "%protocol%//%host%/nuxeo/opensocial/gadgets/makeRequest"
+    "proxyUrl" : "//${Cur['default.domain.unlocked.client']}${Cur['gadgets.uri.proxy.path']}%filename%?container=%container%&refresh=%refresh%&url=%url%%authz%%rewriteMime%",
+    "jsonProxyUrl" : "//${Cur['default.domain.unlocked.client']}${org.nuxeo.ecm.contextPath}/opensocial/gadgets/makeRequest",
+    // Note: this setting MUST be supplied in every container config object, as there is no default if it is not supplied.
+    "unparseableCruft" : "throw 1; < don't be evil' >",
+    // This variable is needed during the config init to parse config augmentation
+    "jsPath" : "${Cur['gadgets.uri.js.path']}",
+
+    // interval in milliseconds used to poll xhr request for the readyState
+    "xhrPollIntervalMs" : 50
   },
   "views" : {
     "default" : {
@@ -121,7 +189,7 @@
     /// parameter if it passes input validation and is not null.
     // This should never be on the same host in a production environment!
     // Only use this for TESTING!
-    "parentRelayUrl" : "/nuxeo/opensocial/gadgets/files/container/rpc_relay.html",
+    "parentRelayUrl" : "${org.nuxeo.ecm.contextPath}/opensocial/gadgets/files/container/rpc_relay.html",
 
     // If true, this will use the legacy ifpc wire format when making rpc
     // requests.
@@ -141,15 +209,24 @@
   "opensocial" : {
     // Path to fetch opensocial data from
     // Must be on the same domain as the gadget rendering server
-	//    "path" : "http://%host%/nuxeo/opensocial/gadgets/rpc",
-	    "path" : "http://%host%/nuxeo/opensocial/social/rpc",
+	//    "path" : "http://%host%${org.nuxeo.ecm.contextPath}/opensocial/gadgets/rpc",
+	    "path" : "http://%host%${org.nuxeo.ecm.contextPath}/opensocial/social/rpc",
     // Path to issue invalidate calls
-    "invalidatePath" : "http://%host%/nuxeo/opensocial/gadgets/api/rpc",
+    "invalidatePath" : "http://%host%${org.nuxeo.ecm.contextPath}/opensocial/gadgets/api/rpc",
     "domain" : "shindig",
     "enableCaja" : false,
     "supportedFields" : {
        "person" : ["id", {"name" : ["familyName", "givenName", "unstructured"]}, "thumbnailUrl", "profileUrl"],
-       "activity" : ["id", "title"]
+       "group" : ["id", "title", "description"],
+       "activity" : ["appId", "body", "bodyId", "externalId", "id", "mediaItems", "postedTime", "priority",
+                     "streamFaviconUrl", "streamSourceUrl", "streamTitle", "streamUrl", "templateParams", "title",
+                     "url", "userId"],
+       "activityEntry" : ["actor", "content", "generator", "icon", "id", "object", "published", "provider", "target",
+                          "title", "updated", "url", "verb", "openSocial", "extensions"],
+       "album" : ["id", "thumbnailUrl", "title", "description", "location", "ownerId"],
+       "mediaItem" : ["album_id", "created", "description", "duration", "file_size", "id", "language", "last_updated",
+                      "location", "mime_type", "num_comments", "num_views", "num_votes", "rating", "start_time",
+                      "tagged_people", "tags", "thumbnail_url", "title", "type", "url"]
     }
   },
   "osapi.services" : {
@@ -164,11 +241,23 @@
   },
   "osapi" : {
     // The endpoints to query for available JSONRPC/REST services
-    "endPoints" : [ "http://%host%/nuxeo/opensocial/social/rpc", "http://%host%/nuxeo/opensocial/gadgets/api/rpc" ]
+    "endPoints" : [ "http://%host%${org.nuxeo.ecm.contextPath}/opensocial/social/rpc", "http://%host%${org.nuxeo.ecm.contextPath}/opensocial/gadgets/api/rpc" ]
   },
   "osml": {
     // OSML library resource.  Can be set to null or the empty string to disable OSML
     // for a container.
     "library": "config/OSML_library.xml"
+  },
+  "shindig-container": {
+    "serverBase": "${org.nuxeo.ecm.contextPath}/opensocial/gadgets/"
+  },
+  "container" : {
+    "relayPath": "${org.nuxeo.ecm.contextPath}/opensocial/gadgets/files/container/rpc_relay.html",
+
+    //Enables/Disables the RPC arbitrator functionality in the common container
+    "enableRpcArbitration": false,
+
+    // This variable is needed during the container feature init.
+    "jsPath" : "${Cur['gadgets.uri.js.path']}"
   }
 }}
