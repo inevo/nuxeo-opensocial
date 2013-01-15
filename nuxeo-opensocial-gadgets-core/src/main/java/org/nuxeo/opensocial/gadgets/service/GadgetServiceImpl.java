@@ -148,8 +148,8 @@ public class GadgetServiceImpl extends DefaultComponent implements
         if (Framework.isTestModeSet()) {
             HttpCache dummyCache = new DefaultHttpCache(new LruCacheProvider(0));
             RequestPipeline pipe = new DefaultRequestPipeline(
-                    new BasicHttpFetcher(), dummyCache, null, null,
-                    new NoOpInvalidationService());
+                    new BasicHttpFetcher(null), dummyCache, null, null,
+                    null, new NoOpInvalidationService(), null);
             CacheProvider cacheProvider = new CacheProvider() {
                 @Override
                 public <K, V> Cache<K, V> createCache(String name) {
