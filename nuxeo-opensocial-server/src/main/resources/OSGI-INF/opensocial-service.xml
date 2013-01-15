@@ -5,7 +5,7 @@
 
   <service>
     <provide interface="org.nuxeo.opensocial.service.api.OpenSocialService" />
-    <provide interface="org.apache.shindig.auth.SecurityTokenDecoder" />
+    <provide interface="org.apache.shindig.auth.SecurityTokenCodec" />
   </service>
 
 <!--

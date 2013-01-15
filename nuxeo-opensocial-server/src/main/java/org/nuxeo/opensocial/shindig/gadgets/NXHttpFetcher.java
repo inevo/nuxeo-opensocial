@@ -28,7 +28,7 @@ import java.util.zip.InflaterInputStream;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import com.google.inject.internal.Preconditions;
+import com.google.common.base.Preconditions;
 import com.google.inject.name.Named;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
