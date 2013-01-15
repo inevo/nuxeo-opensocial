@@ -1,0 +1,9 @@
+<component name="org.nuxeo.opensocial.service.mediaItem">
+
+  <implementation class="org.nuxeo.opensocial.services.mediaItem.MediaItemServiceImpl"/>
+
+  <service>
+    <provide interface="org.apache.shindig.social.opensocial.spi.MediaItemService"/>
+  </service>
+
+</component>

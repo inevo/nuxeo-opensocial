@@ -36,7 +36,7 @@ import com.sun.syndication.feed.synd.SyndPerson;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
 
-public class NXFeedProcessor extends FeedProcessor {
+public class NXFeedProcessor implements FeedProcessor {
 
     /**
      * Converts feed XML to JSON.

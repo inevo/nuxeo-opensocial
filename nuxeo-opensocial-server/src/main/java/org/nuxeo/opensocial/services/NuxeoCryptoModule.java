@@ -19,18 +19,26 @@
 package org.nuxeo.opensocial.services;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.auth.SecurityTokenDecoder;
+import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
+import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
+import org.apache.shindig.social.core.oauth2.OAuth2DataService;
+import org.apache.shindig.social.core.oauth2.OAuth2DataServiceImpl;
+import org.apache.shindig.social.core.oauth2.OAuth2Service;
+import org.apache.shindig.social.core.oauth2.OAuth2ServiceImpl;
 import org.nuxeo.opensocial.service.api.OpenSocialService;
 import org.nuxeo.opensocial.shindig.crypto.NXBlobCrypterSecurityTokenDecoder;
 import org.nuxeo.runtime.api.Framework;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 import net.oauth.OAuthConsumer;
@@ -43,10 +51,16 @@ public class NuxeoCryptoModule extends AbstractModule {
     @Override
     protected final void configure() {
         try {
-            bind(SecurityTokenDecoder.class).to(
+            bind(SecurityTokenCodec.class).to(
                     NXBlobCrypterSecurityTokenDecoder.class);
             bind(OAuthDataStore.class).to(FakeNuxeoDataStore.class);
-
+            
+            bind(OAuth2Service.class).to(OAuth2ServiceImpl.class);
+            bind(OAuth2DataService.class).to(OAuth2DataServiceImpl.class);
+            
+            bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
+                    AuthenticationHandlerProvider.class);
+            
             OpenSocialService oss = Framework.getService(OpenSocialService.class);
 
             // These are here because they are no longer supplied in the

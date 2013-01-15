@@ -20,8 +20,8 @@ package org.nuxeo.opensocial.service.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.apache.shindig.auth.DefaultSecurityTokenDecoder;
-import org.apache.shindig.auth.SecurityTokenDecoder;
+import org.apache.shindig.auth.DefaultSecurityTokenCodec;
+import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.config.ContainerConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,9 +59,9 @@ public class SecurityTokenDecoderTest {
 
     @Test
     public void iCanGetTheSecurityTokenDecoder() throws Exception {
-        SecurityTokenDecoder tokenDecoder = Framework.getService(SecurityTokenDecoder.class);
+        SecurityTokenCodec tokenDecoder = Framework.getService(SecurityTokenCodec.class);
         assertNotNull(tokenDecoder);
-        assertEquals(DefaultSecurityTokenDecoder.class, tokenDecoder.getClass());
+        assertEquals(DefaultSecurityTokenCodec.class, tokenDecoder.getClass());
     }
 
 }

@@ -26,18 +26,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.FeedProcessor;
 import org.apache.shindig.gadgets.FetchResponseUtils;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.LockedDomainService;
+import org.apache.shindig.gadgets.admin.GadgetAdminStore;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
-import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
+import org.apache.shindig.gadgets.process.Processor;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterList.RewriteFlow;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RewriterRegistry;
 import org.apache.shindig.gadgets.servlet.MakeRequestHandler;
-import org.apache.shindig.gadgets.servlet.ProxyBase;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.nuxeo.opensocial.service.api.OpenSocialService;
 import org.nuxeo.runtime.api.Framework;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 /**
@@ -63,9 +71,20 @@ public class NXMakeRequestHandler extends MakeRequestHandler {
     protected OpenSocialService svc;
 
     @Inject
-    public NXMakeRequestHandler(RequestPipeline requestPipeline,
-            RequestRewriterRegistry contentRewriterRegistry) {
-        super(requestPipeline, contentRewriterRegistry);
+    public NXMakeRequestHandler(
+            ContainerConfig config,
+            RequestPipeline requestPipeline,
+            @RewriterRegistry(rewriteFlow = RewriteFlow.DEFAULT) ResponseRewriterRegistry contentRewriterRegistry,
+            Provider<FeedProcessor> feedProcessorProvider, GadgetAdminStore gadgetAdminStore,
+            Processor processor, LockedDomainService lockedDomainService) {
+
+      super(  config, requestPipeline,
+		      contentRewriterRegistry,
+		      feedProcessorProvider,
+		      gadgetAdminStore,
+		      processor,
+		      lockedDomainService);
+
         try {
             svc = Framework.getService(OpenSocialService.class);
         } catch (Exception e) {
@@ -82,7 +101,7 @@ public class NXMakeRequestHandler extends MakeRequestHandler {
     protected String convertResponseToJson(SecurityToken authToken,
             HttpServletRequest request, HttpResponse results)
             throws GadgetException {
-        String originalUrl = request.getParameter(ProxyBase.URL_PARAM);
+        String originalUrl = request.getParameter(Param.URL.getKey());
         String body = results.getResponseAsString();
         if (body.length() > 0) {
             if ("FEED".equals(request.getParameter(CONTENT_TYPE_PARAM))) {
@@ -90,7 +109,7 @@ public class NXMakeRequestHandler extends MakeRequestHandler {
             }
         }
         Map<String, Object> resp = FetchResponseUtils.getResponseAsJson(
-                results, null, body);
+                results, null, body, true);
 
         if (authToken != null) {
             String updatedAuthToken = authToken.getUpdatedToken();

@@ -97,4 +97,22 @@ public class PersonServiceImpl extends DefaultComponent implements
             Set<String> fields, SecurityToken token) throws ProtocolException {
         throw new ProtocolException(500, NOT_IMPLEMENTED);
     }
+
+	@Override
+	public Future<Person> updatePerson(UserId id, Person person,
+			SecurityToken token) throws ProtocolException {
+		String userId = realUid(id, token);
+		
+		try {
+            UserManager um = Framework.getService(UserManager.class);
+            NuxeoPrincipal principal = um.getPrincipal(userId);
+            
+            // TODO - Update the NuxeoPrincipal
+            
+            return ImmediateFuture.newInstance(converter.convert(principal));
+        } catch (Exception e) {
+            throw new ProtocolException(500, "Unable to update user : "
+                    + e.getMessage(), e);
+        }
+	}
 }

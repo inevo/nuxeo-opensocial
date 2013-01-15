@@ -1,17 +1,24 @@
 Manifest-Version: 1.0
-Bundle-ManifestVersion: 1
-Bundle-Name: nuxeo-opensocial
-Bundle-SymbolicName: org.nuxeo.opensocial.service
-Bundle-Version: 1.0.0
+Require-Bundle: org.nuxeo.runtime,org.nuxeo.ecm.platform.usermanager.a
+ pi
 Bundle-Vendor: Leroy Merlin
-Provide-Package: org.nuxeo.opensocial.service
-Require-Bundle: org.nuxeo.runtime,
- org.nuxeo.ecm.platform.usermanager.api
-Nuxeo-Component: OSGI-INF/opensocial-service.xml,
- OSGI-INF/person-service.xml,
- OSGI-INF/activity-service.xml,
- OSGI-INF/appdata-service.xml,
- OSGI-INF/auth-contrib.xml,
- OSGI-INF/web-request-controller-contrib.xml
+Bundle-Version: 1.0.0
 Bundle-Category: stateless
+Bundle-Name: nuxeo-opensocial
 Bundle-Activator: org.nuxeo.opensocial.servlet.Activator
+Nuxeo-Component: OSGI-INF/opensocial-service.xml,OSGI-INF/person-servi
+ ce.xml,OSGI-INF/activity-service.xml,OSGI-INF/appdata-service.xml,OSG
+ I-INF/activity-stream-service.xml,OSGI-INF/album-service.xml,OSGI-INF
+ /group-service.xml,OSGI-INF/media-item-service.xml,OSGI-INF/message-s
+ ervice.xml,OSGI-INF/auth-contrib.xml,OSGI-INF/web-request-controller-
+ contrib.xml,OSGI-INF/extensions/org.nuxeo.opensocial.services.activit
+ yStream.ActivityStreamServiceImpl.xml,OSGI-INF/extensions/org.nuxeo.o
+ pensocial.services.album.AlbumServiceImpl.xml,OSGI-INF/extensions/org
+ .nuxeo.opensocial.services.group.GroupServiceImpl.xml,OSGI-INF/extens
+ ions/org.nuxeo.opensocial.services.mediaItem.MediaItemServiceImpl.xml
+ ,OSGI-INF/extensions/org.nuxeo.opensocial.services.message.MessageSer
+ viceImpl.xml
+Bundle-ManifestVersion: 1
+Provide-Package: org.nuxeo.opensocial.service
+Bundle-SymbolicName: org.nuxeo.opensocial.service
+

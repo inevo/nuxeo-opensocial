@@ -22,7 +22,7 @@ import java.io.FileReader;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.shindig.auth.BlobCrypterSecurityTokenDecoder;
+import org.apache.shindig.auth.BlobCrypterSecurityTokenCodec;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.config.ContainerConfig;
@@ -34,8 +34,7 @@ import org.nuxeo.runtime.api.Framework;
 
 import com.google.inject.Inject;
 
-public class NXBlobCrypterSecurityTokenDecoder extends
-        BlobCrypterSecurityTokenDecoder {
+public class NXBlobCrypterSecurityTokenDecoder extends BlobCrypterSecurityTokenCodec {
 
     private static final Log log = LogFactory.getLog(NXBlobCrypterSecurityTokenDecoder.class);
 

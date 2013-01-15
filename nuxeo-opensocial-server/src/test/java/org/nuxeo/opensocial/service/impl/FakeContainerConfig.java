@@ -25,43 +25,67 @@ import org.apache.shindig.config.ContainerConfig;
 
 public class FakeContainerConfig implements ContainerConfig {
 
-    public boolean getBool(String container, String name) {
-        // TODO Auto-generated method stub
-        return false;
-    }
+	@Override
+	public void addConfigObserver(ConfigObserver arg0, boolean arg1) {
+		// TODO Auto-generated method stub
+		
+	}
 
-    public Collection<String> getContainers() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+	@Override
+	public boolean getBool(String arg0, String arg1) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
-    public int getInt(String container, String name) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
+	@Override
+	public Collection<String> getContainers() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    public List<Object> getList(String container, String name) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+	@Override
+	public int getInt(String arg0, String arg1) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
-    public Map<String, Object> getMap(String container, String name) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+	@Override
+	public <T> List<T> getList(String arg0, String arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    public Map<String, Object> getProperties(String container) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+	@Override
+	public <T> Map<String, T> getMap(String arg0, String arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    public Object getProperty(String container, String name) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+	@Override
+	public Map<String, Object> getProperties(String arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    public String getString(String container, String name) {
-        return "insecure";
-    }
+	@Override
+	public Object getProperty(String arg0, String arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
+	@Override
+	public String getString(String arg0, String arg1) {
+		// TODO Auto-generated method stub
+		return "insecure";
+	}
+
+	@Override
+	public Transaction newTransaction() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+   
+    
+    
 }

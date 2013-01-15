@@ -14,12 +14,18 @@
 -->
       <param-value>
         org.nuxeo.opensocial.shindig.NuxeoPropertiesModule:
-        org.nuxeo.opensocial.services.NXGuiceModule:
+        org.apache.shindig.gadgets.DefaultGuiceModule:
         org.nuxeo.opensocial.services.NuxeoServiceModule:
         org.nuxeo.opensocial.services.NuxeoCryptoModule:
+        org.apache.shindig.gadgets.oauth2.OAuth2Module:
+        org.apache.shindig.gadgets.oauth2.OAuth2MessageModule:
+        org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerModule:
+        org.apache.shindig.gadgets.oauth2.persistence.sample.OAuth2PersistenceModule:
         org.apache.shindig.social.core.config.SocialApiGuiceModule:
         org.nuxeo.opensocial.shindig.gadgets.NXGadgetModule:
-        org.apache.shindig.common.cache.ehcache.EhCacheModule
+        org.apache.shindig.common.cache.ehcache.EhCacheModule:
+        org.apache.shindig.extras.ShindigExtrasGuiceModule:
+        org.apache.shindig.gadgets.admin.GadgetAdminModule
       </param-value>
     </context-param>
   </extension>
@@ -111,10 +117,17 @@
     <servlet>
       <servlet-name>proxy</servlet-name>
       <servlet-class>
-        org.apache.shindig.gadgets.servlet.NXProxyServlet
+        org.apache.shindig.gadgets.servlet.ProxyServlet
       </servlet-class>
     </servlet>
 
+    <servlet>
+    <servlet-name>accel</servlet-name>
+    <servlet-class>
+      org.apache.shindig.gadgets.servlet.HtmlAccelServlet
+    </servlet-class>
+  </servlet>
+  
     <!-- makeRequest -->
     <servlet>
       <servlet-name>makeRequest</servlet-name>
@@ -127,7 +140,7 @@
     <servlet>
       <servlet-name>concat</servlet-name>
       <servlet-class>
-        org.apache.shindig.gadgets.servlet.NXConcatProxyServlet
+        org.apache.shindig.gadgets.servlet.ConcatProxyServlet
     </servlet-class>
     </servlet>
 
@@ -244,6 +257,11 @@
       <url-pattern>/opensocial/gadgets/ifr</url-pattern>
     </servlet-mapping>
 
+    <servlet-mapping>
+    <servlet-name>accel</servlet-name>
+    <url-pattern>/opensocial/gadgets/accel</url-pattern>
+  </servlet-mapping>
+  
     <servlet-mapping>
       <servlet-name>metadata</servlet-name>
       <url-pattern>/opensocial/gadgets/metadata</url-pattern>

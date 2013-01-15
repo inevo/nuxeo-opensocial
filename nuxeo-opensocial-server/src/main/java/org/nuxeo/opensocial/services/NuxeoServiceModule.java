@@ -20,11 +20,17 @@ package org.nuxeo.opensocial.services;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
+import org.apache.shindig.social.opensocial.spi.ActivityStreamService;
+import org.apache.shindig.social.opensocial.spi.AlbumService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
+import org.apache.shindig.social.opensocial.spi.GroupService;
+import org.apache.shindig.social.opensocial.spi.MediaItemService;
+import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.nuxeo.runtime.api.Framework;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
 
 public class NuxeoServiceModule extends AbstractModule {
 
@@ -34,6 +40,21 @@ public class NuxeoServiceModule extends AbstractModule {
     protected final void configure() {
 
         try {
+        	
+            // TODO - check if we really need this
+        	bind(String.class).annotatedWith(Names.named("shindig.canonical.json.db"))
+            	.toInstance("sampledata/canonicaldb.json");
+        	
+            bind(ActivityStreamService.class).toInstance(
+            		Framework.getService(ActivityStreamService.class));
+            bind(AlbumService.class).toInstance(
+                	Framework.getService(AlbumService.class));
+            bind(MediaItemService.class).toInstance(
+                	Framework.getService(MediaItemService.class));
+            bind(MessageService.class).toInstance(
+                	Framework.getService(MessageService.class));
+            bind(GroupService.class).toInstance(
+                	Framework.getService(GroupService.class));    
             bind(PersonService.class).toInstance(
                     Framework.getService(PersonService.class));
             bind(ActivityService.class).toInstance(
