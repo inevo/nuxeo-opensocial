@@ -18,104 +18,155 @@
 
 /**
  * @fileoverview Caja is a whitelisting javascript sanitizing rewriter.
- * This file tames the APIs that are exposed to a gadget
+ * This file tames the APIs that are exposed to a gadget.
+ * Currently limited to one cajoled gadget per ifr.
  */
 
-var caja___ = (function() {
-    // URI policy: Rewrites all uris in a cajoled gadget
+caja___ = (function() {
+
+  // Rewrites all uris in a cajoled gadget
   var uriCallback = {
     rewrite: function rewrite(uri, mimeTypes) {
       uri = String(uri);
-      // By default, only allow references to anchors.
       if (/^#/.test(uri)) {
+        // Allow references to anchors within the gadget
         return '#' + encodeURIComponent(decodeURIComponent(uri.substring(1)));
-        // and files on the same host
-      } else if (/^\/(?:[^\/][^?#]*)?$/.test(uri)) {
-        return encodeURI(decodeURI(uri));
+      } else if (/^\/[^\/]/.test(uri)) {
+        // Unqualified uris aren't resolved in a useful way in gadgets, so
+        // this isn't a real case, but some of the samples use relative
+        // uris for images, and it looks odd if they don't work cajoled.
+        return gadgets.io.getProxyUrl(
+          location.protocol + '//' + location.host + uri);
+      } else {
+        // Proxy all other dynamically constructed urls
+        return gadgets.io.getProxyUrl(uri);
       }
-      // This callback can be replaced with one that passes the URL through
-      // a proxy that checks the mimetype.
-      return null;
     }
   };
 
-  var fire = function(globalScope) {
-    for (var tamer in tamings___) {
-      if (tamings___.hasOwnProperty(tamer)) {
-        // This is just tamings___[tamer](globalScope)
-        // but in a way that does not leak a potent "this"
-        // to the taming functions
-        (1, tamings___[tamer])(globalScope);
-      }
-    }
+  function getTameGlobal() {
+    return caja.iframe.contentWindow;
   }
+
+  function getJSON() {
+    return caja.iframe.contentWindow.JSON;
+  }
+
+  function getUseless() {
+    return caja.USELESS;
+  }
+
+  function markFunction(func, name) {
+    return caja.markFunction(func, name);
+  }
+
+  function tame(obj) {
+    return caja.tame(obj);
+  }
+
+  function tamesTo(feral, tame) {
+    return caja.tamesTo(feral, tame);
+  }
+
+  function untame(obj) {
+    return caja.untame(obj);
+  }
+
   function whitelistCtors(schemas) {
     var length = schemas.length;
-    for (var i=0; i < length; i++) {
+    for (var i = 0; i < length; i++) {
       var schema = schemas[i];
       if (typeof schema[0][schema[1]] === 'function') {
-        ___.markCtor(schema[0][schema[1]] /* func */, schema[2] /* parent */, schema[1] /* name */);
+        caja.markCtor(
+            schema[0][schema[1]] /* func */,
+            schema[2] /* parent */,
+            schema[1] /* name */);
       } else {
-        gadgets.warn("Error taming constructor: " + schema[0] + "." + schema[1]);
-      }
-    }
-  }
-  function whitelistFuncs(schemas) {
-    var length = schemas.length;
-    for (var i=0; i < length; i++) {
-      var schema = schemas[i];
-      if (typeof schema[0][schema[1]] === 'function') {
-        ___.markInnocent(schema[0][schema[1]], schema[1]);
-      } else {
-        gadgets.warn("Error taming function: " + schema[0] + "." + schema[1]);
-      }
-    }
-  }
-  function whitelistMeths(schemas) {
-    var length = schemas.length;
-    for (var i=0; i < length; i++) {
-      var schema = schemas[i];
-      if (typeof schema[0][schema[1]] == 'function') {
-        ___.grantInnocentMethod(schema[0].prototype, schema[1]);
-      } else {
-        gadgets.warn("Error taming method: " + schema[0] + "." + schema[1]);
+        gadgets.warn('Error taming constructor: ' +
+            schema[0] + '.' + schema[1]);
       }
     }
   }
 
-  function enable() {
-    var imports = ___.copy(___.sharedImports);
-    imports.outers = imports;
-    
-    var gadgetRoot = document.getElementById('cajoled-output');
-    gadgetRoot.className = 'g___';
-    document.body.appendChild(gadgetRoot);
-    
-    imports.htmlEmitter___ = new HtmlEmitter(gadgetRoot);
-    attachDocumentStub('-g___', uriCallback, imports, gadgetRoot);
-    
-    imports.$v = valijaMaker.CALL___(imports.outers);
-    
-    ___.getNewModuleHandler().setImports(imports);
-    
-    fire(imports);
-    
-    imports.outers.gadgets = ___.tame(window.gadgets);
-    imports.outers.opensocial = ___.tame(window.opensocial);
-    ___.grantRead(imports.outers, 'gadgets');
-    ___.grantRead(imports.outers, 'opensocial');
+  function whitelistFuncs(schemas) {
+    var length = schemas.length;
+    for (var i = 0; i < length; i++) {
+      var schema = schemas[i];
+      if (typeof schema[0][schema[1]] === 'function') {
+        caja.markFunction(schema[0][schema[1]], schema[1]);
+      } else {
+        gadgets.warn('Error taming function: ' + schema[0] + '.' + schema[1]);
+      }
+    }
   }
+
+  function whitelistMeths(schemas) {
+    var length = schemas.length;
+    for (var i = 0; i < length; i++) {
+      var schema = schemas[i];
+      if (typeof schema[0].prototype[schema[1]] == 'function') {
+        caja.grantMethod(schema[0].prototype, schema[1]);
+      } else {
+        gadgets.warn('Error taming method: ' + schema[0] + '.' + schema[1]);
+      }
+    }
+  }
+
+  function whitelistProps(schemas) {
+    var length = schemas.length;
+    for (var i = 0; i < length; i++) {
+      var schema = schemas[i];
+      caja.grantRead(schemas[0], schemas[1]);
+    }
+  }
+
+  function start(script, debug) {
+    caja.initialize({
+      server: '/gadgets',
+      resources: '/gadgets/js',
+      // TODO(felix8a): make debug==false work
+      debug: true
+    });
+    var gadgetBody = document.getElementById('caja_innerContainer___');
+    caja.load(gadgetBody, uriCallback, function (frame) {
+      var api = makeApi();
+      frame.api(api).cajoled(void 0, script)
+        .run(function (result) {
+          gadgets.util.runOnLoadHandlers();
+        });
+    });
+  }
+
+  function makeApi() {
+    var api = {};
+    for (var tamer in tamings___) {
+      if (tamings___.hasOwnProperty(tamer)) {
+        tamings___[tamer].call(void 0, api);
+      }
+    }
+    api.gadgets = caja.tame(window.gadgets);
+    api.opensocial = caja.tame(window.opensocial);
+    api.osapi = caja.tame(window.osapi);
+    api.onerror = caja.tame(caja.markFunction(
+        function (msg, source, line) {
+          gadgets.log([msg, source, line]);
+        }));
+    return api;
+  }
+
   return {
-    enable: enable,
+    getJSON: getJSON,
+    getTameGlobal: getTameGlobal,
+    getUseless: getUseless,
+    markFunction: markFunction,
+    start: start,
+    tame: tame,
+    tamesTo: tamesTo,
+    untame: untame,
     whitelistCtors: whitelistCtors,
     whitelistFuncs: whitelistFuncs,
-    whitelistMeths: whitelistMeths
+    whitelistMeths: whitelistMeths,
+    whitelistProps: whitelistProps
   };
 })();
 
-// Expose alert and console.log to cajoled programs
-var tamings___ = tamings___ || [];
-tamings___.push(function(imports) {
-  imports.outers.alert = function(msg) { alert(msg); };
-  ___.grantFunc(imports.outers, 'alert');
-});
